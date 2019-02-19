@@ -57,7 +57,9 @@ def eventLoop(modules, inputFile, outputFile, inputTree, wrappedOutputTree, maxE
         doneEvents += 1
         ret = True
         for m in modules: 
-            ret = m.analyze(e) 
+	    #print m
+            ret = m.analyze(e, inputTree) 
+            #ret = m.analyze(e) 
             if not ret: break
         if ret:
             acceptedEvents += 1
