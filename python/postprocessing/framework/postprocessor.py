@@ -12,7 +12,7 @@ from PhysicsTools.NanoAODTools.postprocessing.framework.jobreport import JobRepo
 
 class PostProcessor :
     def __init__(self,outputDir,inputFiles,cut=None,branchsel=None,modules=[],compression="LZMA:9",friend=False,postfix=None,
-		 jsonInput=None,noOut=False,justcount=False,provenance=False,haddFileName=None,fwkJobReport=False,histFileName=None,histDirName=None, outputbranchsel=None):
+		 jsonInput=None,noOut=False,justcount=False,provenance=False,haddFileName=None,fwkJobReport=False,histFileName=None,histDirName=None, outputbranchsel=None, outputbranchselsmear=None):
 	self.outputDir=outputDir
 	self.inputFiles=inputFiles
 	self.cut=cut
@@ -33,7 +33,8 @@ class PostProcessor :
 		self.haddFileName="tree.root"
  	self.branchsel = BranchSelection(branchsel) if branchsel else None 
         self.outputbranchsel = BranchSelection(outputbranchsel) if outputbranchsel else None
-        self.histFileName=histFileName
+        self.outputbranchselsmear = BranchSelection(outputbranchselsmear) if outputbranchselsmear else None
+	self.histFileName=histFileName
         self.histDirName=histDirName
     def run(self) :
         outpostfix = self.postfix if self.postfix != None else ("_Friend" if self.friend else "_Skim")
@@ -106,11 +107,16 @@ class PostProcessor :
                 outFileName = os.path.join(self.outputDir, os.path.basename(fname).replace(".root",outpostfix+".root"))
                 outFile = ROOT.TFile.Open(outFileName, "RECREATE", "", compressionLevel)
                 outFileNames.append(outFileName)
+                outFileNameSmear = os.path.join(self.outputDir, os.path.basename(fname).replace(".root",outpostfix+"_smear.root"))
+                outFileSmear = ROOT.TFile.Open(outFileNameSmear, "RECREATE", "", compressionLevel)
+                #outFileNames.append(outFileNameSmear)
                 if compressionLevel: 
                     outFile.SetCompressionAlgorithm(compressionAlgo)
+                    outFileSmear.SetCompressionAlgorithm(compressionAlgo)
                 # prepare output tree
                 if self.friend:
                     outTree = FriendOutput(inFile, inTree, outFile)
+                    outTreeSmear = FriendOutput(inFile, inTree, outFileSmear)
                 else:
                     outTree = FullOutput(
                         inFile,
@@ -121,13 +127,22 @@ class PostProcessor :
                         fullClone=fullClone,
                         jsonFilter=jsonFilter,
                         provenance=self.provenance)
+                    outTreeSmear = FullOutput(
+                        inFile,
+                        inTree,
+                        outFileSmear,
+                        branchSelection=self.branchsel,
+                        outputbranchSelection=self.outputbranchselsmear,
+                        fullClone=fullClone,
+                        jsonFilter=jsonFilter,
+                        provenance=self.provenance)
             else : 
                 outFile = None
                 outTree = None
 
 	    # process events, if needed
 	    if not fullClone:
-		(nall, npass, timeLoop) = eventLoop(self.modules, inFile, outFile, inTree, outTree)
+		(nall, npass, timeLoop) = eventLoop(self.modules, inFile, outFile, inTree, outTree, outFileSmear, outTreeSmear)
 		print 'Processed %d preselected entries from %s (%s entries). Finally selected %d entries' % (nall, fname, inTree.GetEntries(), npass)
 	    else:
                 nall = inTree.GetEntries()
@@ -137,6 +152,8 @@ class PostProcessor :
             if not self.noOut: 
                 outTree.write()
                 outFile.Close()
+		outTreeSmear.write()
+		outFileSmear.Close()
                 print "Done %s" % outFileName
 	    if self.jobReport:
 		self.jobReport.addInputFile(fname,nall)
