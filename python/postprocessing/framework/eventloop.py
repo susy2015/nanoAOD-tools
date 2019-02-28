@@ -43,9 +43,12 @@ class Module:
             self.objs.append( getattr( self, obj.GetName() + '_' + name ) )
         setattr( self, obj.GetName(), objlist )
 
-def eventLoop(modules, inputFile, outputFile, inputTree, wrappedOutputTree, outputFileSmear=None, outputTreeSmear=None, maxEvents=-1, eventRange=None, progress=(10000,sys.stdout), filterOutput=True): 
-    for m in modules: 
-        m.beginFile(inputFile, outputFile, inputTree, wrappedOutputTree, outputFileSmear, outputTreeSmear)
+def eventLoop(modules, inputFile, outputFile, inputTree, wrappedOutputTree, outputFileSmear=None, outputTreeSmear=None, typeofprocess=None, maxEvents=-1, eventRange=None, progress=(500,sys.stdout), filterOutput=True): 
+    for m in modules:
+	if typeofprocess == "smear":
+		m.beginFile(inputFile, outputFile, inputTree, wrappedOutputTree, outputFileSmear, outputTreeSmear)
+	else:
+        	m.beginFile(inputFile, outputFile, inputTree, wrappedOutputTree)
 
     t0 = time.clock(); tlast = t0; doneEvents = 0; acceptedEvents = 0
     entries = inputTree.entries
@@ -61,7 +64,7 @@ def eventLoop(modules, inputFile, outputFile, inputTree, wrappedOutputTree, outp
             if not ret: break
         if ret:
             acceptedEvents += 1
-        if (ret or not filterOutput) and wrappedOutputTree != None: 
+        if (ret or not filterOutput) and wrappedOutputTree != None and typeofprocess != "resp": 
             wrappedOutputTree.fill()
         if progress:
             if i > 0 and i % progress[0] == 0:

@@ -12,7 +12,7 @@ from PhysicsTools.NanoAODTools.postprocessing.framework.jobreport import JobRepo
 
 class PostProcessor :
     def __init__(self,outputDir,inputFiles,cut=None,branchsel=None,modules=[],compression="LZMA:9",friend=False,postfix=None,
-		 jsonInput=None,noOut=False,justcount=False,provenance=False,haddFileName=None,fwkJobReport=False,histFileName=None,histDirName=None, outputbranchsel=None, outputbranchselsmear=None):
+		 jsonInput=None,noOut=False,justcount=False,provenance=False,haddFileName=None,fwkJobReport=False,histFileName=None,histDirName=None, outputbranchsel=None, outputbranchselsmear=None, typeofprocess=None):
 	self.outputDir=outputDir
 	self.inputFiles=inputFiles
 	self.cut=cut
@@ -34,6 +34,7 @@ class PostProcessor :
  	self.branchsel = BranchSelection(branchsel) if branchsel else None 
         self.outputbranchsel = BranchSelection(outputbranchsel) if outputbranchsel else None
         self.outputbranchselsmear = BranchSelection(outputbranchselsmear) if outputbranchselsmear else None
+	self.typeofprocess=typeofprocess
 	self.histFileName=histFileName
         self.histDirName=histDirName
     def run(self) :
@@ -104,19 +105,25 @@ class PostProcessor :
 
 	    # prepare output file
             if not self.noOut:
-                outFileName = os.path.join(self.outputDir, os.path.basename(fname).replace(".root",outpostfix+".root"))
-                outFile = ROOT.TFile.Open(outFileName, "RECREATE", "", compressionLevel)
+                if self.typeofprocess == "resp": outFileName = os.path.join(self.outputDir, os.path.basename(fname).replace(".root",outpostfix+"_flat.root"))
+                elif self.typeofprocess == "smear": outFileName = os.path.join(self.outputDir, os.path.basename(fname).replace(".root",outpostfix+"_smear_1.root"))
+                else: outFileName = os.path.join(self.outputDir, os.path.basename(fname).replace(".root",outpostfix+".root"))
+		outFile = ROOT.TFile.Open(outFileName, "RECREATE", "", compressionLevel)
                 outFileNames.append(outFileName)
-                outFileNameSmear = os.path.join(self.outputDir, os.path.basename(fname).replace(".root",outpostfix+"_smear.root"))
-                outFileSmear = ROOT.TFile.Open(outFileNameSmear, "RECREATE", "", compressionLevel)
-                #outFileNames.append(outFileNameSmear)
+		if self.typeofprocess == "smear":
+			outFileNameSmear = os.path.join(self.outputDir, os.path.basename(fname).replace(".root",outpostfix+"_smear_2.root"))
+			outFileSmear = ROOT.TFile.Open(outFileNameSmear, "RECREATE", "", compressionLevel)
+			outFileNames.append(outFileNameSmear)
+		else:
+			outFileSmear = None
+			outTreeSmear = None
                 if compressionLevel: 
                     outFile.SetCompressionAlgorithm(compressionAlgo)
-                    outFileSmear.SetCompressionAlgorithm(compressionAlgo)
+		    if self.typeofprocess == "smear": outFileSmear.SetCompressionAlgorithm(compressionAlgo)
                 # prepare output tree
                 if self.friend:
                     outTree = FriendOutput(inFile, inTree, outFile)
-                    outTreeSmear = FriendOutput(inFile, inTree, outFileSmear)
+		    if self.typeofprocess == "smear": outTreeSmear = FriendOutput(inFile, inTree, outFileSmear)
                 else:
                     outTree = FullOutput(
                         inFile,
@@ -127,22 +134,23 @@ class PostProcessor :
                         fullClone=fullClone,
                         jsonFilter=jsonFilter,
                         provenance=self.provenance)
-                    outTreeSmear = FullOutput(
-                        inFile,
-                        inTree,
-                        outFileSmear,
-                        branchSelection=self.branchsel,
-                        outputbranchSelection=self.outputbranchselsmear,
-                        fullClone=fullClone,
-                        jsonFilter=jsonFilter,
-                        provenance=self.provenance)
+		    if self.typeofprocess == "smear":
+                        outTreeSmear = FullOutput(
+                            inFile,
+                            inTree,
+                            outFileSmear,
+                            branchSelection=self.branchsel,
+                            outputbranchSelection=self.outputbranchselsmear,
+                            fullClone=fullClone,
+                            jsonFilter=jsonFilter,
+                            provenance=self.provenance)
             else : 
                 outFile = None
                 outTree = None
 
 	    # process events, if needed
 	    if not fullClone:
-		(nall, npass, timeLoop) = eventLoop(self.modules, inFile, outFile, inTree, outTree, outFileSmear, outTreeSmear)
+		(nall, npass, timeLoop) = eventLoop(self.modules, inFile, outFile, inTree, outTree, outFileSmear, outTreeSmear, self.typeofprocess)
 		print 'Processed %d preselected entries from %s (%s entries). Finally selected %d entries' % (nall, fname, inTree.GetEntries(), npass)
 	    else:
                 nall = inTree.GetEntries()
@@ -152,9 +160,11 @@ class PostProcessor :
             if not self.noOut: 
                 outTree.write()
                 outFile.Close()
-		outTreeSmear.write()
-		outFileSmear.Close()
                 print "Done %s" % outFileName
+		if self.typeofprocess == "smear":
+			outTreeSmear.write()
+			outFileSmear.Close()
+			print "Done %s" % outFileNameSmear
 	    if self.jobReport:
 		self.jobReport.addInputFile(fname,nall)
 		
@@ -162,9 +172,10 @@ class PostProcessor :
 	
 	print  totEntriesRead/(time.clock()-t0), "Hz"
 
-
-	if self.haddFileName :
-		os.system("./haddnano.py %s %s" %(self.haddFileName," ".join(outFileNames))) #FIXME: remove "./" once haddnano.py is distributed with cms releases
+	if self.haddFileName:
+		if self.typeofprocess == "smear": Name = os.path.join(self.outputDir, os.path.basename(fname).replace(".root",outpostfix+"_smear.root"))
+		os.system("./haddnano.py %s %s" %(Name," ".join(outFileNames))) #FIXME: remove "./" once haddnano.py is distributed with cms releases
+		os.system("rm %s" %(" ".join(outFileNames)))
 	if self.jobReport :
 		self.jobReport.addOutputFile(self.haddFileName)
 		self.jobReport.save()
