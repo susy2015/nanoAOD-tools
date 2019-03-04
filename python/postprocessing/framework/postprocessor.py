@@ -174,7 +174,7 @@ class PostProcessor :
 
 	if self.haddFileName:
 		if self.typeofprocess == "smear": Name = os.path.join(self.outputDir, os.path.basename(fname).replace(".root",outpostfix+"_smear.root"))
-		os.system("./haddnano.py %s %s" %(Name," ".join(outFileNames))) #FIXME: remove "./" once haddnano.py is distributed with cms releases
+		os.system("$CMSSW_BASE/src/PhysicsTools/NanoAODTools/scripts/haddnano.py %s %s" %(Name," ".join(outFileNames))) #FIXME: remove "./" once haddnano.py is distributed with cms releases
 		os.system("rm %s" %(" ".join(outFileNames)))
 	if self.jobReport :
 		self.jobReport.addOutputFile(self.haddFileName)
