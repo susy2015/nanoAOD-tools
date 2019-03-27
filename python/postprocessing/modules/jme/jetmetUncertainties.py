@@ -10,7 +10,7 @@ from PhysicsTools.NanoAODTools.postprocessing.modules.jme.jetSmearer import jetS
 from PhysicsTools.NanoAODTools.postprocessing.modules.jme.JetReCalibrator import JetReCalibrator
 
 class jetmetUncertaintiesProducer(Module):
-    def __init__(self, era, globalTag, jesUncertainties = [ "Total" ], jetType = "AK4PFchs", redoJEC=False, noGroom=False):
+    def __init__(self, era, globalTag, jerTag="", jesUncertainties = [ "Total" ], jetType = "AK4PFchs", redoJEC=False, noGroom=False):
 
         self.era = era
 	self.redoJEC = redoJEC
@@ -23,8 +23,8 @@ class jetmetUncertaintiesProducer(Module):
         self.jesUncertainties = jesUncertainties
 
         # smear jet pT to account for measured difference in JER between data and simulation.
-        self.jerInputFileName = "Spring16_25nsV10_MC_PtResolution_" + jetType + ".txt"
-        self.jerUncertaintyInputFileName = "Spring16_25nsV10_MC_SF_" + jetType + ".txt"
+        self.jerInputFileName = jerTag + "_PtResolution_" + jetType + ".txt"
+        self.jerUncertaintyInputFileName = jerTag + "_SF_" + jetType + ".txt"
         self.jetSmearer = jetSmearer(globalTag, jetType, self.jerInputFileName, self.jerUncertaintyInputFileName)
 
         if "AK4" in jetType : 
@@ -55,21 +55,7 @@ class jetmetUncertaintiesProducer(Module):
         # read jet energy scale (JES) uncertainties
         # (downloaded from https://twiki.cern.ch/twiki/bin/view/CMS/JECDataMC )
         self.jesInputFilePath = os.environ['CMSSW_BASE'] + "/src/PhysicsTools/NanoAODTools/data/jme/"
-        if len(jesUncertainties) == 1 and jesUncertainties[0] == "Total":
-            if self.era == "2016":
-                self.jesUncertaintyInputFileName = "Summer16_23Sep2016V4_MC_Uncertainty_" + jetType + ".txt"
-            elif self.era == "2017":
-                self.jesUncertaintyInputFileName = "Fall17_17Nov2017_V6_MC_Uncertainty_" + jetType + ".txt"
-            else:
-                raise ValueError("ERROR: Invalid era = '%s'!" % self.era)
-        else:
-            if self.era == "2016":
-                self.jesUncertaintyInputFileName = "Summer16_23Sep2016V4_MC_UncertaintySources_" + jetType + ".txt"
-            elif self.era == "2017":
-                self.jesUncertaintyInputFileName = "Fall17_17Nov2017_V6_MC_UncertaintySources_" + jetType + ".txt"
-            else:
-                raise ValueError("ERROR: Invalid era = '%s'!" % self.era)
-
+        self.jesUncertaintyInputFileName = self.jesInputFilePath + "/" + globalTag + "_Uncertainty_" + jetType + ".txt"
 
         # read all uncertainty source names from the loaded file
         if jesUncertainties[0] == "All":
@@ -79,10 +65,8 @@ class jetmetUncertaintiesProducer(Module):
                 sources = map(lambda x: x[1:-1], sources)
                 self.jesUncertainties = sources
             
-
 	if self.redoJEC :
 	    self.jetReCalibrator = JetReCalibrator(globalTag, jetType , True, self.jesInputFilePath, calculateSeparateCorrections = False, calculateType1METCorrection  = False)
-	
 
         # define energy threshold below which jets are considered as "unclustered energy"
         # (cf. JetMETCorrections/Type1MET/python/correctionTermsPfMetType1Type2_cff.py )
@@ -103,7 +87,7 @@ class jetmetUncertaintiesProducer(Module):
         # implementation didn't seem to work for factorized JEC, try again another way
         for jesUncertainty in self.jesUncertainties:
             jesUncertainty_label = jesUncertainty
-            if self.era == "2016" and jesUncertainty == 'Total' and len(self.jesUncertainties) == 1:
+            if jesUncertainty == 'Total' and len(self.jesUncertainties) == 1:
                 jesUncertainty_label = ''
             pars = ROOT.JetCorrectorParameters(os.path.join(self.jesInputFilePath, self.jesUncertaintyInputFileName),jesUncertainty_label)
             self.jesUncertainty[jesUncertainty] = ROOT.JetCorrectionUncertainty(pars)    
