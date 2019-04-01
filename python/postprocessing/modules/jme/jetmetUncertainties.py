@@ -10,11 +10,12 @@ from PhysicsTools.NanoAODTools.postprocessing.modules.jme.jetSmearer import jetS
 from PhysicsTools.NanoAODTools.postprocessing.modules.jme.JetReCalibrator import JetReCalibrator
 
 class jetmetUncertaintiesProducer(Module):
-    def __init__(self, era, globalTag, jerTag="", jesUncertainties = [ "Total" ], jetType = "AK4PFchs", redoJEC=False, noGroom=False):
+    def __init__(self, era, globalTag, jerTag="", jesUncertainties = [ "Total" ], jetType = "AK4PFchs", redoJEC=False, noGroom=False, doSmearing=True):
 
         self.era = era
 	self.redoJEC = redoJEC
         self.noGroom = noGroom
+        self.doSmearing = doSmearing
         #--------------------------------------------------------------------------------------------
         # CV: globalTag and jetType not yet used, as there is no consistent set of txt files for
         #     JES uncertainties and JER scale factors and uncertainties yet
@@ -100,16 +101,16 @@ class jetmetUncertaintiesProducer(Module):
 
     def beginFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
         self.out = wrappedOutputTree
-        self.out.branch("%s_pt_nom" % self.jetBranchName, "F", lenVar=self.lenVar)
+        self.out.branch("%s_pt" % self.jetBranchName, "F", lenVar=self.lenVar)
         self.out.branch("%s_corr_JEC" % self.jetBranchName, "F", lenVar=self.lenVar)
         self.out.branch("%s_corr_JER" % self.jetBranchName, "F", lenVar=self.lenVar)
-        self.out.branch("%s_mass_nom" % self.jetBranchName, "F", lenVar=self.lenVar)
+        self.out.branch("%s_mass" % self.jetBranchName, "F", lenVar=self.lenVar)
         if self.doGroomed:
             self.out.branch("%s_msoftdrop_nom" % self.jetBranchName, "F", lenVar=self.lenVar)
             
         if self.corrMET:
-            self.out.branch("%s_pt_nom" % self.metBranchName, "F")
-            self.out.branch("%s_phi_nom" % self.metBranchName, "F")
+            self.out.branch("%s_pt" % self.metBranchName, "F")
+            self.out.branch("%s_phi" % self.metBranchName, "F")
         
         for shift in [ "Up", "Down" ]:
             self.out.branch("%s_pt_jer%s" % (self.jetBranchName, shift), "F", lenVar=self.lenVar)
@@ -233,7 +234,9 @@ class jetmetUncertaintiesProducer(Module):
             jets_corr_JEC.append(jet_pt/jet_rawpt)
             jets_corr_JER.append(jet_pt_jerNomVal)
             
-            jet_pt_nom           = jet_pt_jerNomVal *jet_pt
+            jet_pt_nom = jet_pt
+            if self.doSmearing:
+                jet_pt_nom *= jet_pt_jerNomVal
             if jet_pt_nom < 0.0:
                 jet_pt_nom *= -1.0
             jet_pt_jerUp         = jet_pt_jerUpVal  *jet_pt
@@ -352,12 +355,12 @@ class jetmetUncertaintiesProducer(Module):
 
 
             
-        self.out.fillBranch("%s_pt_nom" % self.jetBranchName, jets_pt_nom)
+        self.out.fillBranch("%s_pt" % self.jetBranchName, jets_pt_nom)
         self.out.fillBranch("%s_corr_JEC" % self.jetBranchName, jets_corr_JEC)
         self.out.fillBranch("%s_corr_JER" % self.jetBranchName, jets_corr_JER)
         self.out.fillBranch("%s_pt_jerUp" % self.jetBranchName, jets_pt_jerUp)
         self.out.fillBranch("%s_pt_jerDown" % self.jetBranchName, jets_pt_jerDown)
-        self.out.fillBranch("%s_mass_nom" % self.jetBranchName, jets_mass_nom)
+        self.out.fillBranch("%s_mass" % self.jetBranchName, jets_mass_nom)
         self.out.fillBranch("%s_mass_jerUp" % self.jetBranchName, jets_mass_jerUp)
         self.out.fillBranch("%s_mass_jerDown" % self.jetBranchName, jets_mass_jerDown)
         self.out.fillBranch("%s_mass_jmrUp" % self.jetBranchName, jets_mass_jmrUp)
@@ -377,8 +380,8 @@ class jetmetUncertaintiesProducer(Module):
 
             
         if self.corrMET :
-            self.out.fillBranch("%s_pt_nom" % self.metBranchName, math.sqrt(met_px_nom**2 + met_py_nom**2))
-            self.out.fillBranch("%s_phi_nom" % self.metBranchName, math.atan2(met_py_nom, met_px_nom))        
+            self.out.fillBranch("%s_pt" % self.metBranchName, math.sqrt(met_px_nom**2 + met_py_nom**2))
+            self.out.fillBranch("%s_phi" % self.metBranchName, math.atan2(met_py_nom, met_px_nom))        
             self.out.fillBranch("%s_pt_jerUp" % self.metBranchName, math.sqrt(met_px_jerUp**2 + met_py_jerUp**2))
             self.out.fillBranch("%s_phi_jerUp" % self.metBranchName, math.atan2(met_py_jerUp, met_px_jerUp))        
             self.out.fillBranch("%s_pt_jerDown" % self.metBranchName, math.sqrt(met_px_jerDown**2 + met_py_jerDown**2))
