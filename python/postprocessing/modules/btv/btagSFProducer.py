@@ -70,8 +70,26 @@ class btagSFProducer(Module):
                 }
             },
             'deepcsv' : {
+                '2016' : {
+                    'inputFileName' : "DeepCSV_2016LegacySF_V1.csv",
+                    'measurement_types' : {
+                        0 : "comb",  # b
+                        1 : "comb",  # c
+                        2 : "incl"   # light
+                    },
+                    'supported_wp' : [ "L", "M", "T", "shape_corr"]
+                },
                 '2017' : {
-                    'inputFileName' : "DeepCSV_94XSF_V2_B_F.csv",
+                    'inputFileName' : "DeepCSV_94XSF_V4_B_F.csv",
+                    'measurement_types' : {
+                        0 : "comb",  # b
+                        1 : "comb",  # c
+                        2 : "incl"   # light
+                    },
+                    'supported_wp' : [ "L", "M", "T", "shape_corr"]
+                },
+                '2018' : {
+                    'inputFileName' : "DeepCSV_102XSF_V1.csv",
                     'measurement_types' : {
                         0 : "comb",  # b
                         1 : "comb",  # c
@@ -160,6 +178,7 @@ class btagSFProducer(Module):
     def beginJob(self):
         # initialize BTagCalibrationReader
         # (cf. https://twiki.cern.ch/twiki/bin/viewauth/CMS/BTagCalibration )
+        print self.algo, os.path.join(self.inputFilePath, self.inputFileName)
         self.calibration = ROOT.BTagCalibration(self.algo, os.path.join(self.inputFilePath, self.inputFileName))
         self.readers = {}
         for wp in self.supported_wp:
