@@ -42,9 +42,9 @@ class jetRecalib(Module):
 
     def beginFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
         self.out = wrappedOutputTree
-        self.out.branch("%s_pt_nom" % self.jetBranchName, "F", lenVar=self.lenVar)
-        self.out.branch("MET_pt_nom" , "F")
-        self.out.branch("MET_phi_nom", "F")
+        self.out.branch("%s_pt" % self.jetBranchName, "F", lenVar=self.lenVar)
+        self.out.branch("MET_pt" , "F")
+        self.out.branch("MET_phi", "F")
             
                         
     def endFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
@@ -75,9 +75,9 @@ class jetRecalib(Module):
                 jet_sinPhi = math.sin(jet.phi)
                 met_px_nom = met_px_nom - (jet_pt_nom - jet.pt)*jet_cosPhi
                 met_py_nom = met_py_nom - (jet_pt_nom - jet.pt)*jet_sinPhi
-        self.out.fillBranch("%s_pt_nom" % self.jetBranchName, jets_pt_nom)
-        self.out.fillBranch("MET_pt_nom", math.sqrt(met_px_nom**2 + met_py_nom**2))
-        self.out.fillBranch("MET_phi_nom", math.atan2(met_py_nom, met_px_nom))        
+        self.out.fillBranch("%s_pt" % self.jetBranchName, jets_pt_nom)
+        self.out.fillBranch("MET_pt", math.sqrt(met_px_nom**2 + met_py_nom**2))
+        self.out.fillBranch("MET_phi", math.atan2(met_py_nom, met_px_nom))        
 
         return True
 
