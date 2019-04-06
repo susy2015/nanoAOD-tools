@@ -3,7 +3,7 @@ import os
 import numpy as np
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 
-from PhysicsTools.NanoAODTools.postprocessing.framework.datamodel import Collection 
+from PhysicsTools.NanoAODTools.postprocessing.framework.datamodel import Collection
 from PhysicsTools.NanoAODTools.postprocessing.framework.eventloop import Module
 
 class puWeightProducer(Module):
@@ -12,22 +12,22 @@ class puWeightProducer(Module):
         if doSysVar:
             self.targeth_plus = self.loadHisto(targetfile,targethist+"_plus")
             self.targeth_minus = self.loadHisto(targetfile,targethist+"_minus")
-        self.fixLargeWeights = True
-	if myfile != "auto" :
-		self.autoPU=False
-	        self.myh = self.loadHisto(myfile,myhist)
-	else :
-        	self.fixLargeWeights = False #AR: it seems to crash with it, to be deugged
-		self.autoPU=True
-		ROOT.gROOT.cd()
-		self.myh=self.targeth.Clone("autoPU")
-		self.myh.Reset()
+        self.fixLargeWeights = False
+        if myfile != "auto" :
+            self.autoPU=False
+            self.myh = self.loadHisto(myfile,myhist)
+        else :
+            self.fixLargeWeights = False #AR: it seems to crash with it, to be deugged
+            self.autoPU=True
+            ROOT.gROOT.cd()
+            self.myh=self.targeth.Clone("autoPU")
+            self.myh.Reset()
         self.name = name
         self.norm = norm
         self.verbose = verbose
         self.nvtxVar = nvtx_var
         self.doSysVar = doSysVar
-       
+
         #Try to load module via python dictionaries
         try:
             ROOT.gSystem.Load("libPhysicsToolsNanoAODTools")
@@ -43,22 +43,25 @@ class puWeightProducer(Module):
     def loadHisto(self,filename,hname):
         tf = ROOT.TFile.Open(filename)
         hist = tf.Get(hname)
+        # In case PU file is not generated yet, use the first one as default
+        if hist is None:
+            hist = tf.Get(tf.GetListOfKeys()[0].GetName())
         hist.SetDirectory(None)
         tf.Close()
         return hist
     def beginJob(self):
-	pass
+        pass
     def endJob(self):
         pass
     def beginFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
-	if self.autoPU :
-                self.myh.Reset()
-		print "Computing PU profile for this file"
-		ROOT.gROOT.cd()
-		inputFile.Get("Events").Project("autoPU",self.nvtxVar)#doitfrom inputFile
-		if outputFile : 
-		    outputFile.cd()
-		    self.myh.Write()    
+        if self.autoPU :
+            self.myh.Reset()
+            print ("Computing PU profile for this file")
+            ROOT.gROOT.cd()
+            inputFile.Get("Events").Project("autoPU",self.nvtxVar)#doitfrom inputFile
+            if outputFile :
+                outputFile.cd()
+                self.myh.Write()
         self._worker = ROOT.WeightCalculatorFromHistogram(self.myh,self.targeth,self.norm,self.fixLargeWeights,self.verbose)
         self.out = wrappedOutputTree
         self.out.branch(self.name, "F")
