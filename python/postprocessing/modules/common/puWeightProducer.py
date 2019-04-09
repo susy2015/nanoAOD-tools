@@ -44,7 +44,7 @@ class puWeightProducer(Module):
         tf = ROOT.TFile.Open(filename)
         hist = tf.Get(hname)
         # In case PU file is not generated yet, use the first one as default
-        if hist is None:
+        if hist == None:
             hist = tf.Get(tf.GetListOfKeys()[0].GetName())
         hist.SetDirectory(None)
         tf.Close()
