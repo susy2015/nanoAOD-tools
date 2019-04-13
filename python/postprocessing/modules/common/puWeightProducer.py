@@ -68,8 +68,8 @@ class puWeightProducer(Module):
         if self.doSysVar:
             self._worker_plus = ROOT.WeightCalculatorFromHistogram(self.myh,self.targeth_plus,self.norm,self.fixLargeWeights,self.verbose)
             self._worker_minus = ROOT.WeightCalculatorFromHistogram(self.myh,self.targeth_minus,self.norm,self.fixLargeWeights,self.verbose)
-            self.out.branch(self.name+"Up","F")
-            self.out.branch(self.name+"Down","F")
+            self.out.branch(self.name+"_Up","F")
+            self.out.branch(self.name+"_Down","F")
     def endFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
         pass
     def analyze(self, event):
@@ -83,8 +83,8 @@ class puWeightProducer(Module):
         else: weight = 1
         self.out.fillBranch(self.name,weight)
         if self.doSysVar:
-            self.out.fillBranch(self.name+"Up",weight_plus)
-            self.out.fillBranch(self.name+"Down",weight_minus)
+            self.out.fillBranch(self.name+"_Up",weight_plus)
+            self.out.fillBranch(self.name+"_Down",weight_minus)
         return True
 
 # define modules using the syntax 'name = lambda : constructor' to avoid having them loaded when not needed
