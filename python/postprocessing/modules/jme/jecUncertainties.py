@@ -26,7 +26,7 @@ class jecUncertProducer(Module):
     def beginFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
         self.out = wrappedOutputTree
 	for u,branchname in self.uncerts :
-	        self.out.branch(branchname, "F", lenVar="nJet")
+	        self.out.branch(branchname, "F", lenVar="nJet", limitedPrecision=12)
     def endFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
         pass
     def analyze(self, event):
