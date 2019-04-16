@@ -57,7 +57,6 @@ class OutputTree:
             saveBranch = self._branchSelection.keepBranch(name)
         else:
             saveBranch = True
-        print name, saveBranch
         self._branches[name] = OutputBranch(self._tree, name, rootBranchType, n=n, lenVar=lenVar, title=title,limitedPrecision=limitedPrecision, saveBranch=saveBranch)
         return self._branches[name]
     def fillBranch(self, name, val):
