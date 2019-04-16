@@ -1,4 +1,4 @@
-import re
+import re, fnmatch
 
 class BranchSelection:
     def __init__(self,filename):
@@ -22,6 +22,20 @@ class BranchSelection:
             except ValueError, e:
                 print "Error in file %s, line '%s': it's not (keep|keepmatch|drop|dropmatch) <branch_pattern>" % (filename, line)
         self._ops = ops
+
+    def keepBranch(self, branchName):
+        keep = True
+        for bre, stat in self._ops:
+            if type(bre) == re._pattern_type:
+                if re.match(bre, branchName): 
+                    keep = stat == 1                   
+            else:
+                if fnmatch.fnmatch(branchName, bre):
+                    keep = stat == 1                    
+
+        return keep
+
+        
     def selectBranches(self,tree):
         tree.SetBranchStatus("*",1)
         branchNames = [ b.GetName() for b in tree.GetListOfBranches() ]
