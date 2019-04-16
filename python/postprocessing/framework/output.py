@@ -12,7 +12,7 @@ class OutputBranch:
         self.buff   = array(_rootBranchType2PythonArray[rootBranchType], n*[0. if rootBranchType in 'FD' else 0])
         self.lenVar = lenVar
         self.n = n
-        self.precision = ROOT.ReduceMantissaToNbitsRounding(int(limitedPrecision)) if limitedPrecision is not None and rootBranchType=='F' else lambda x : x
+        self.precision = ROOT.ReduceMantissaToNbitsRounding(int(limitedPrecision)) if limitedPrecision is not None and int(limitedPrecision) > 0 and rootBranchType=='F' else lambda x : x
         #check if a branch was already there 
         if saveBranch:
             existingBranch = tree.GetBranch(name)
