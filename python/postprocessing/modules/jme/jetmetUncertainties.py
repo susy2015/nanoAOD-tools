@@ -113,10 +113,10 @@ class jetmetUncertaintiesProducer(Module):
             self.out.branch("%s_phi" % self.metBranchName, "F")
         
         for shift in [ "Up", "Down" ]:
-            self.out.branch("%s_pt_jer%s" % (self.jetBranchName, shift), "F", lenVar=self.lenVar)
-            self.out.branch("%s_mass_jer%s" % (self.jetBranchName, shift), "F", lenVar=self.lenVar)
-            self.out.branch("%s_mass_jmr%s" % (self.jetBranchName, shift), "F", lenVar=self.lenVar)
-            self.out.branch("%s_mass_jms%s" % (self.jetBranchName, shift), "F", lenVar=self.lenVar)
+            self.out.branch("%s_pt_jer%s" % (self.jetBranchName, shift), "F", lenVar=self.lenVar, limitedPrecision=12)
+            self.out.branch("%s_mass_jer%s" % (self.jetBranchName, shift), "F", lenVar=self.lenVar, limitedPrecision=12)
+            self.out.branch("%s_mass_jmr%s" % (self.jetBranchName, shift), "F", lenVar=self.lenVar, limitedPrecision=12)
+            self.out.branch("%s_mass_jms%s" % (self.jetBranchName, shift), "F", lenVar=self.lenVar, limitedPrecision=12)
 
             if self.doGroomed: 
                 self.out.branch("%s_msoftdrop_jer%s" % (self.jetBranchName, shift), "F", lenVar=self.lenVar)
@@ -124,19 +124,19 @@ class jetmetUncertaintiesProducer(Module):
                 self.out.branch("%s_msoftdrop_jms%s" % (self.jetBranchName, shift), "F", lenVar=self.lenVar)
 
             if self.corrMET :
-                self.out.branch("%s_pt_jer%s" % (self.metBranchName, shift), "F")
-                self.out.branch("%s_phi_jer%s" % (self.metBranchName, shift), "F")
+                self.out.branch("%s_pt_jer%s" % (self.metBranchName, shift), "F", limitedPrecision=12)
+                self.out.branch("%s_phi_jer%s" % (self.metBranchName, shift), "F", limitedPrecision=12)
             for jesUncertainty in self.jesUncertainties:
-                self.out.branch("%s_pt_jes%s%s" % (self.jetBranchName, jesUncertainty, shift), "F", lenVar=self.lenVar)
-                self.out.branch("%s_mass_jes%s%s" % (self.jetBranchName, jesUncertainty, shift), "F", lenVar=self.lenVar)
+                self.out.branch("%s_pt_jes%s%s" % (self.jetBranchName, jesUncertainty, shift), "F", lenVar=self.lenVar, limitedPrecision=12)
+                self.out.branch("%s_mass_jes%s%s" % (self.jetBranchName, jesUncertainty, shift), "F", lenVar=self.lenVar, limitedPrecision=12)
                 if self.doGroomed:
                     self.out.branch("%s_msoftdrop_jes%s%s" % (self.jetBranchName, jesUncertainty, shift), "F", lenVar=self.lenVar)
                 if self.corrMET :
-                    self.out.branch("%s_pt_jes%s%s" % (self.metBranchName, jesUncertainty, shift), "F")
-                    self.out.branch("%s_phi_jes%s%s" % (self.metBranchName, jesUncertainty, shift), "F")
+                    self.out.branch("%s_pt_jes%s%s" % (self.metBranchName, jesUncertainty, shift), "F", limitedPrecision=12)
+                    self.out.branch("%s_phi_jes%s%s" % (self.metBranchName, jesUncertainty, shift), "F", limitedPrecision=12)
             if self.corrMET :
-                self.out.branch("%s_pt_unclustEn%s" % (self.metBranchName, shift), "F")
-                self.out.branch("%s_phi_unclustEn%s" % (self.metBranchName, shift), "F")
+                self.out.branch("%s_pt_unclustEn%s" % (self.metBranchName, shift), "F", limitedPrecision=12)
+                self.out.branch("%s_phi_unclustEn%s" % (self.metBranchName, shift), "F", limitedPrecision=12)
                         
     def endFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
         pass
