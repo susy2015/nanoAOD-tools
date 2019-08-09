@@ -258,7 +258,8 @@ class jetmetUncertaintiesProducer(Module):
             jmsDownVal = self.jmsVals[1]
             jmsUpVal = self.jmsVals[2]
             ( jet_mass_jmrNomVal, jet_mass_jmrUpVal, jet_mass_jmrDownVal ) = self.jetSmearer.getSmearValsM(jet, genJet)
-            jet_mass_nom           = jet_pt_jerNomVal*jet_mass_jmrNomVal*jmsNomVal*jet.mass
+            #jet_mass_nom           = jet_pt_jerNomVal*jet_mass_jmrNomVal*jmsNomVal*jet.mass
+            jet_mass_nom           = jet.mass
             if jet_mass_nom < 0.0:
                 jet_mass_nom *= -1.0
             jets_mass_nom    .append(jet_mass_nom)
