@@ -90,6 +90,7 @@ class jetSmearer(Module):
 
         jet_pt_sf_and_uncertainty = {}
         for enum_central_or_shift in [ enum_nominal, enum_shift_up, enum_shift_down ]:
+            self.params_sf_and_uncertainty.setJetPt(jet.Perp())
             self.params_sf_and_uncertainty.setJetEta(jet.Eta())
             jet_pt_sf_and_uncertainty[enum_central_or_shift] = self.jerSF_and_Uncertainty.getScaleFactor(self.params_sf_and_uncertainty, enum_central_or_shift)
 
