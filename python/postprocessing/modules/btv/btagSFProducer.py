@@ -44,6 +44,7 @@ class btagSFProducer(Module):
         self.max_abs_eta = 2.4
 
         # define measurement type for each flavor
+        #https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation
         self.inputFilePath = os.environ['CMSSW_BASE'] + "/src/PhysicsTools/NanoAODTools/data/btagSF/"
         self.inputFileName = sfFileName
         self.measurement_types = None
@@ -79,8 +80,8 @@ class btagSFProducer(Module):
                     },
                     'supported_wp' : [ "L", "M", "T", "shape_corr"]
                 },
-                '2017' : {
-                    'inputFileName' : "DeepCSV_94XSF_V4_B_F.csv",
+                '2017' : {#https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation94X
+                    'inputFileName' : "DeepCSV_94XSF_V5_B_F.csv"#DeepCSV_94XSF_V4_B_F.csv",
                     'measurement_types' : {
                         0 : "comb",  # b
                         1 : "comb",  # c
@@ -88,7 +89,7 @@ class btagSFProducer(Module):
                     },
                     'supported_wp' : [ "L", "M", "T", "shape_corr"]
                 },
-                '2018' : {
+                '2018' : {##https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation102X
                     'inputFileName' : "DeepCSV_102XSF_V1.csv",
                     'measurement_types' : {
                         0 : "comb",  # b
