@@ -202,8 +202,12 @@ class btagSFProducer(Module):
         self.branchNames_central_and_systs = {}
         for central_or_syst in self.central_and_systs:
             if central_or_syst == "central":
+                if era.find("FastSim"):
+                    self.branchNames_central_and_systs[central_or_syst] = "Jet_btagSF_FS"
                 self.branchNames_central_and_systs[central_or_syst] = "Jet_btagSF"
             else:
+                if era.find("FastSim"):
+                    self.branchNames_central_and_systs[central_or_syst] = "Jet_btagSF_FS_%s" % central_or_syst
                 self.branchNames_central_and_systs[central_or_syst] = "Jet_btagSF_%s" % central_or_syst
 
         self.branchNames_central_and_systs_shape_corr = {}
