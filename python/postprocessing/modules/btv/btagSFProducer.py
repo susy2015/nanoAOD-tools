@@ -5,19 +5,29 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 from PhysicsTools.NanoAODTools.postprocessing.framework.datamodel import Collection
 from PhysicsTools.NanoAODTools.postprocessing.framework.eventloop import Module
 
-def is_relevant_syst_for_shape_corr(flavor_btv, syst):
+def is_relevant_syst_for_shape_corr(flavor_btv, syst, self):
     """Returns true if a flavor/syst combination is relevant"""
+    era = self.era
     if flavor_btv == 0:
+        if era.find("FastSim"):
+           return syst in [ "central",
+                          "up", "down"]
         return syst in [ "central",
                          "up_jes", "down_jes",
                          "up_lf", "down_lf",
                          "up_hfstats1", "down_hfstats1",
                          "up_hfstats2", "down_hfstats2" ]
     elif flavor_btv == 1:
+        if era.find("FastSim"):
+            return syst in [ "central",
+                    "up", "down"]
         return syst in [ "central",
                          "up_cferr1", "down_cferr1",
                          "up_cferr2", "down_cferr2" ]
     elif flavor_btv == 2:
+        if era.find("FastSim"):
+            return syst in [ "central",
+                    "up", "down"]
         return syst in [ "central",
                          "up_jes", "down_jes",
                          "up_hf", "down_hf",
@@ -79,6 +89,15 @@ class btagSFProducer(Module):
                         2 : "incl"   # light
                     },
                     'supported_wp' : [ "L", "M", "T", "shape_corr"]
+                },
+                '2016FastSim' : {
+                    'inputFileName' : "deepcsv_13TEV_16SL_18_3_2019.csv",
+                    'measurement_types' : {
+                        0 : "fastsim",  # b
+                        1 : "fastsim",  # c
+                        2 : "fastsim"   # light
+                    },
+                    'supported_wp' : [ "L", "M", "T"]
                 },
                 '2017' : {#https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation94X
                     'inputFileName' : "DeepCSV_94XSF_V5_B_F.csv",#DeepCSV_94XSF_V4_B_F.csv",
@@ -263,7 +282,7 @@ class btagSFProducer(Module):
             # evaluate SF
             sf = None
             if shape_corr:
-                if is_relevant_syst_for_shape_corr(flavor_btv, syst):
+                if is_relevant_syst_for_shape_corr(flavor_btv, syst, self):
                     sf = reader.eval_auto_bounds(syst, flavor_btv, eta, pt, discr)
                 else:
                     sf = reader.eval_auto_bounds('central', flavor_btv, eta, pt, discr)
