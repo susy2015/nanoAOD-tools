@@ -108,6 +108,15 @@ class btagSFProducer(Module):
                     },
                     'supported_wp' : [ "L", "M", "T", "shape_corr"]
                 },
+                '2017FastSim' : {#https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation94X
+                    'inputFileName' : "deepcsv_13TEV_17SL_18_3_2019.csv",
+                     'measurement_types' : {
+                         0 : "fastsim",  # b
+                         1 : "fastsim",  # c
+                         2 : "fastsim"   # light
+                     },
+                     'supported_wp' : [ "L", "M", "T"]
+                 },     
                 '2018' : {##https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation102X
                     'inputFileName' : "DeepCSV_102XSF_V1.csv",
                     'measurement_types' : {
@@ -116,6 +125,15 @@ class btagSFProducer(Module):
                         2 : "incl"   # light
                     },
                     'supported_wp' : [ "L", "M", "T", "shape_corr"]
+                },
+                '2018' : {##https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation102X
+                    'inputFileName' : "deepcsv_13TEV_18SL_7_5_2019.csv",
+                    'measurement_types' : {
+                        0 : "fastsim",  # b
+                        1 : "fastsim",  # c
+                        2 : "fastsim"   # light
+                    },
+                    'supported_wp' : [ "L", "M", "T"]
                 }
             },
             'cmva' : {
