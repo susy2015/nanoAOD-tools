@@ -126,7 +126,7 @@ class btagSFProducer(Module):
                     },
                     'supported_wp' : [ "L", "M", "T", "shape_corr"]
                 },
-                '2018' : {##https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation102X
+                '2018FastSim' : {##https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation102X
                     'inputFileName' : "deepcsv_13TEV_18SL_7_5_2019.csv",
                     'measurement_types' : {
                         0 : "fastsim",  # b
