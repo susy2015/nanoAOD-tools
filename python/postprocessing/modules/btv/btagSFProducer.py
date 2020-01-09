@@ -5,11 +5,10 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 from PhysicsTools.NanoAODTools.postprocessing.framework.datamodel import Collection
 from PhysicsTools.NanoAODTools.postprocessing.framework.eventloop import Module
 
-def is_relevant_syst_for_shape_corr(flavor_btv, syst, self):
+def is_relevant_syst_for_shape_corr(flavor_btv, syst, era):
     """Returns true if a flavor/syst combination is relevant"""
-    era = self.era
     if flavor_btv == 0:
-        if era.find("FastSim"):
+        if "FastSim" in era:
            return syst in [ "central",
                           "up", "down"]
         return syst in [ "central",
@@ -18,14 +17,14 @@ def is_relevant_syst_for_shape_corr(flavor_btv, syst, self):
                          "up_hfstats1", "down_hfstats1",
                          "up_hfstats2", "down_hfstats2" ]
     elif flavor_btv == 1:
-        if era.find("FastSim"):
+        if "FastSim" in era:
             return syst in [ "central",
                     "up", "down"]
         return syst in [ "central",
                          "up_cferr1", "down_cferr1",
                          "up_cferr2", "down_cferr2" ]
     elif flavor_btv == 2:
-        if era.find("FastSim"):
+        if "FastSim" in era:
             return syst in [ "central",
                     "up", "down"]
         return syst in [ "central",
@@ -81,7 +80,7 @@ class btagSFProducer(Module):
                 }
             },
             'deepcsv' : {
-                '2016' : {
+                '2016' : {#https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation2016Legacy
                     'inputFileName' : "DeepCSV_2016LegacySF_V1.csv",
                     'measurement_types' : {
                         0 : "comb",  # b
@@ -90,7 +89,7 @@ class btagSFProducer(Module):
                     },
                     'supported_wp' : [ "L", "M", "T", "shape_corr"]
                 },
-                '2016FastSim' : {
+                '2016FastSim' : {#https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation2016Legacy
                     'inputFileName' : "deepcsv_13TEV_16SL_18_3_2019.csv",
                     'measurement_types' : {
                         0 : "fastsim",  # b
@@ -304,7 +303,7 @@ class btagSFProducer(Module):
             # evaluate SF
             sf = None
             if shape_corr:
-                if is_relevant_syst_for_shape_corr(flavor_btv, syst, self):
+                if is_relevant_syst_for_shape_corr(flavor_btv, syst, self.era):
                     sf = reader.eval_auto_bounds(syst, flavor_btv, eta, pt, discr)
                 else:
                     sf = reader.eval_auto_bounds('central', flavor_btv, eta, pt, discr)
