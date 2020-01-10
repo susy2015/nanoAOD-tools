@@ -5,19 +5,28 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 from PhysicsTools.NanoAODTools.postprocessing.framework.datamodel import Collection
 from PhysicsTools.NanoAODTools.postprocessing.framework.eventloop import Module
 
-def is_relevant_syst_for_shape_corr(flavor_btv, syst):
+def is_relevant_syst_for_shape_corr(flavor_btv, syst, era):
     """Returns true if a flavor/syst combination is relevant"""
     if flavor_btv == 0:
+        if "FastSim" in era:
+           return syst in [ "central",
+                          "up", "down"]
         return syst in [ "central",
                          "up_jes", "down_jes",
                          "up_lf", "down_lf",
                          "up_hfstats1", "down_hfstats1",
                          "up_hfstats2", "down_hfstats2" ]
     elif flavor_btv == 1:
+        if "FastSim" in era:
+            return syst in [ "central",
+                    "up", "down"]
         return syst in [ "central",
                          "up_cferr1", "down_cferr1",
                          "up_cferr2", "down_cferr2" ]
     elif flavor_btv == 2:
+        if "FastSim" in era:
+            return syst in [ "central",
+                    "up", "down"]
         return syst in [ "central",
                          "up_jes", "down_jes",
                          "up_hf", "down_hf",
@@ -44,6 +53,7 @@ class btagSFProducer(Module):
         self.max_abs_eta = 2.4
 
         # define measurement type for each flavor
+        #https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation
         self.inputFilePath = os.environ['CMSSW_BASE'] + "/src/PhysicsTools/NanoAODTools/data/btagSF/"
         self.inputFileName = sfFileName
         self.measurement_types = None
@@ -70,7 +80,7 @@ class btagSFProducer(Module):
                 }
             },
             'deepcsv' : {
-                '2016' : {
+                '2016' : {#https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation2016Legacy
                     'inputFileName' : "DeepCSV_2016LegacySF_V1.csv",
                     'measurement_types' : {
                         0 : "comb",  # b
@@ -79,8 +89,17 @@ class btagSFProducer(Module):
                     },
                     'supported_wp' : [ "L", "M", "T", "shape_corr"]
                 },
-                '2017' : {
-                    'inputFileName' : "DeepCSV_94XSF_V4_B_F.csv",
+                '2016FastSim' : {#https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation2016Legacy
+                    'inputFileName' : "deepcsv_13TEV_16SL_18_3_2019.csv",
+                    'measurement_types' : {
+                        0 : "fastsim",  # b
+                        1 : "fastsim",  # c
+                        2 : "fastsim"   # light
+                    },
+                    'supported_wp' : [ "L", "M", "T"]
+                },
+                '2017' : {#https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation94X
+                    'inputFileName' : "DeepCSV_94XSF_V5_B_F.csv",#DeepCSV_94XSF_V4_B_F.csv",
                     'measurement_types' : {
                         0 : "comb",  # b
                         1 : "comb",  # c
@@ -88,7 +107,16 @@ class btagSFProducer(Module):
                     },
                     'supported_wp' : [ "L", "M", "T", "shape_corr"]
                 },
-                '2018' : {
+                '2017FastSim' : {#https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation94X
+                    'inputFileName' : "deepcsv_13TEV_17SL_18_3_2019.csv",
+                     'measurement_types' : {
+                         0 : "fastsim",  # b
+                         1 : "fastsim",  # c
+                         2 : "fastsim"   # light
+                     },
+                     'supported_wp' : [ "L", "M", "T"]
+                 },     
+                '2018' : {##https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation102X
                     'inputFileName' : "DeepCSV_102XSF_V1.csv",
                     'measurement_types' : {
                         0 : "comb",  # b
@@ -96,6 +124,15 @@ class btagSFProducer(Module):
                         2 : "incl"   # light
                     },
                     'supported_wp' : [ "L", "M", "T", "shape_corr"]
+                },
+                '2018FastSim' : {##https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation102X
+                    'inputFileName' : "deepcsv_13TEV_18SL_7_5_2019.csv",
+                    'measurement_types' : {
+                        0 : "fastsim",  # b
+                        1 : "fastsim",  # c
+                        2 : "fastsim"   # light
+                    },
+                    'supported_wp' : [ "L", "M", "T"]
                 }
             },
             'cmva' : {
@@ -160,13 +197,18 @@ class btagSFProducer(Module):
             self.systs_shape_corr.append("down_%s" % syst)
         self.central_and_systs_shape_corr = [ "central" ]
         self.central_and_systs_shape_corr.extend(self.systs_shape_corr)
-
         self.branchNames_central_and_systs = {}
         for central_or_syst in self.central_and_systs:
             if central_or_syst == "central":
-                self.branchNames_central_and_systs[central_or_syst] = "Jet_btagSF"
+                if "FastSim" in era:
+                    self.branchNames_central_and_systs[central_or_syst] = "Jet_btagSF_FS"
+                else:
+                    self.branchNames_central_and_systs[central_or_syst] = "Jet_btagSF"
             else:
-                self.branchNames_central_and_systs[central_or_syst] = "Jet_btagSF_%s" % central_or_syst
+                if "FastSim" in era:
+                    self.branchNames_central_and_systs[central_or_syst] = "Jet_btagSF_FS_%s" % central_or_syst
+                else:
+                    self.branchNames_central_and_systs[central_or_syst] = "Jet_btagSF_%s" % central_or_syst
 
         self.branchNames_central_and_systs_shape_corr = {}
         for central_or_syst in self.central_and_systs_shape_corr:
@@ -262,7 +304,7 @@ class btagSFProducer(Module):
             # evaluate SF
             sf = None
             if shape_corr:
-                if is_relevant_syst_for_shape_corr(flavor_btv, syst):
+                if is_relevant_syst_for_shape_corr(flavor_btv, syst, self.era):
                     sf = reader.eval_auto_bounds(syst, flavor_btv, eta, pt, discr)
                 else:
                     sf = reader.eval_auto_bounds('central', flavor_btv, eta, pt, discr)
@@ -295,6 +337,8 @@ class btagSFProducer(Module):
         for central_or_syst in self.central_and_systs:
             central_or_syst = central_or_syst.lower()
             scale_factors = list(self.getSFs(preloaded_jets, central_or_syst, reader, 'auto', False))
+            #if "FastSim" in self.era:
+                #self.out.fillBranch(self.branchNames_central_and_systs[central_or_syst], scale_factors)
             self.out.fillBranch(self.branchNames_central_and_systs[central_or_syst], scale_factors)
         # shape corrections
         reader = self.getReader('shape_corr', True)
