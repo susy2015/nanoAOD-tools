@@ -197,17 +197,18 @@ class btagSFProducer(Module):
             self.systs_shape_corr.append("down_%s" % syst)
         self.central_and_systs_shape_corr = [ "central" ]
         self.central_and_systs_shape_corr.extend(self.systs_shape_corr)
-
         self.branchNames_central_and_systs = {}
         for central_or_syst in self.central_and_systs:
             if central_or_syst == "central":
-                if era.find("FastSim"):
+                if "FastSim" in era:
                     self.branchNames_central_and_systs[central_or_syst] = "Jet_btagSF_FS"
-                self.branchNames_central_and_systs[central_or_syst] = "Jet_btagSF"
+                else:
+                    self.branchNames_central_and_systs[central_or_syst] = "Jet_btagSF"
             else:
-                if era.find("FastSim"):
+                if "FastSim" in era:
                     self.branchNames_central_and_systs[central_or_syst] = "Jet_btagSF_FS_%s" % central_or_syst
-                self.branchNames_central_and_systs[central_or_syst] = "Jet_btagSF_%s" % central_or_syst
+                else:
+                    self.branchNames_central_and_systs[central_or_syst] = "Jet_btagSF_%s" % central_or_syst
 
         self.branchNames_central_and_systs_shape_corr = {}
         for central_or_syst in self.central_and_systs_shape_corr:
@@ -336,6 +337,8 @@ class btagSFProducer(Module):
         for central_or_syst in self.central_and_systs:
             central_or_syst = central_or_syst.lower()
             scale_factors = list(self.getSFs(preloaded_jets, central_or_syst, reader, 'auto', False))
+            #if "FastSim" in self.era:
+                #self.out.fillBranch(self.branchNames_central_and_systs[central_or_syst], scale_factors)
             self.out.fillBranch(self.branchNames_central_and_systs[central_or_syst], scale_factors)
         # shape corrections
         reader = self.getReader('shape_corr', True)
