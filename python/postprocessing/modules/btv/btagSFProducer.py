@@ -303,13 +303,16 @@ class btagSFProducer(Module):
                 eta = +max_abs_eta - epsilon
             # evaluate SF
             sf = None
-            if shape_corr:
-                if is_relevant_syst_for_shape_corr(flavor_btv, syst, self.era):
-                    sf = reader.eval_auto_bounds(syst, flavor_btv, eta, pt, discr)
+            if flavor_btv  != -1 :
+                if shape_corr:
+                    if is_relevant_syst_for_shape_corr(flavor_btv, syst, self.era):
+                        sf = reader.eval_auto_bounds(syst, flavor_btv, eta, pt, discr)
+                    else:
+                        sf = reader.eval_auto_bounds('central', flavor_btv, eta, pt, discr)
                 else:
-                    sf = reader.eval_auto_bounds('central', flavor_btv, eta, pt, discr)
+                    sf = reader.eval_auto_bounds(syst, flavor_btv, eta, pt)
             else:
-                sf = reader.eval_auto_bounds(syst, flavor_btv, eta, pt)
+                sf = 1
             # check if SF is OK
             if sf < 0.01:
                 if self.verbose > 0:
